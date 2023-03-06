@@ -4,30 +4,31 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from datetime import timedelta
 
 
-errados = ['Apps','Jobs']
 
-# Define the root folder where you want to start searching for .mp4 files
-root_folder = 'E:\\BACKUP\\Lucas'
+#Pasta para o programa começar a procurar os arquivos
+pasta_inicial = 'PastaParaProcurar'
 
-# Define the output Excel file where you want to store the information
-output_file = 'C:\\Users\\Henrique\\Desktop\\file.xlsx'
+#Onde o arquivo excel será criado
+output_file = 'LocalDoArquivoExcel'
 
-# Create a new Excel workbook and worksheet
+#Criar uma pasta excel usando o modulo xlswriter
 workbook = xlsxwriter.Workbook(output_file)
+#Adicionar uma planinha a pasta exceel
 worksheet = workbook.add_worksheet()
 
-# Write the headers to the worksheet
-worksheet.write('A1', 'File Name')
-worksheet.write('B1', 'Folder Name')
-worksheet.write('C1', 'Duration')
+#Colocar o cabeçalho
+worksheet.write('A1', 'Nome do Arquivo')
+worksheet.write('B1', 'Nome da Pasta')
+worksheet.write('C1', 'Duração')
 
-# Define the row number to start writing the data
-row = 2
+#Linha inicial, para não colocar no cabeçalho
+linha_excel = 2
 
-# Loop through all folders and subfolders under the root folder
-for root, dirs, files in os.walk(root_folder):
-    # Skip folders ending with '1'
-    if os.path.basename(root).endswith('1') or 'Apps' in root or 'Jobs' in root:
+#Criar um loop para passar por todos as pastas, arquivos, tendo como base a pasta inicial e usando o modulo 'os'
+for root, dirs, files in os.walk(pasta_inicial):
+    #Pular as pastas que terminem com '1',printando as pastas que vão ser lidas e as que foram puladas
+    if os.path.basename(root).endswith('1'):
+        
         print('\033[91m' + 'Pasta Pulada: ' + os.path.basename(root) + '\033[0m')
 
         continue
@@ -37,44 +38,49 @@ for root, dirs, files in os.walk(root_folder):
         
     
     
-     # Loop through all files in the current folder
-    for file in files:
-        # Check if the file is an .mp4 file
-        if file.endswith('.mp4'):
-            # Construct the output values with the file name and folder name
-            file_name = file
-            folder_name = os.path.basename(root)
-            file_path = os.path.join(root, file)
-            
-            # Get the duration of the video
-            video_path = os.path.join(root, file)
-            video = VideoFileClip(video_path)
-            duration = video.duration
-            hours, remainder = divmod(duration, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            if hours == 0:
-                duration_str = f'{int(minutes):02d}m {int(seconds):02d}s'
-            else:
-                duration_str = f'{int(hours):02d}h {int(minutes):02d}m {int(seconds):02d}s'
-            video.close()
-            # Format the duration as hours, minutes, and seconds
-            
-            
-            # Check if the folder ends with '2'
-            if folder_name.endswith('2'):
-                # Write the values to the Excel file with red font
-                worksheet.write(f'A{row}', file_name, workbook.add_format({'font_color': 'red'}))
-                worksheet.write(f'B{row}', folder_name, workbook.add_format({'font_color': 'red'}))
-                worksheet.write(f'C{row}', duration_str, workbook.add_format({'font_color': 'red'}))
-            else:
-                # Write the values to the Excel file
-                worksheet.write(f'A{row}', file_name)
-                worksheet.write(f'B{row}', folder_name)
-                worksheet.write(f'C{row}', duration_str)
-            
-            # Increment the row number for the next data
-            row += 1
 
-# Close the Excel workbook
+    for arquivo in files:
+        #Olha por todos os arquivos numa lista de arquivos e salva os que terminam com .mp4
+        if arquivo.endswith('.mp4'):
+            # Valores que vao ser passados
+            nome_arquivo = arquivo
+            nome_pasta = os.path.basename(root)
+            # Caminho do arquivo para pegar duração
+            caminho_arquivo = os.path.join(root, arquivo)
+            
+            #Pegar duração do arquivo.mp4
+
+            video = VideoFileClip(caminho_arquivo)
+            duration = video.duration
+            
+            #Transformar segundos em horas, pega o valor de segundos dividindo por 3600, o que sobra vira minutos, depois divide os minutos por 60, e o que sobra vira segundos
+            horas, remainder = divmod(duration, 3600)
+            minutos, segundos = divmod(remainder, 60)
+            
+            #Se não tiver mais que uma hora, sera salvo somente os minutos e os segundos
+            if horas == 0:
+                duration_str = f'{int(minutos):02d}m {int(segundos):02d}s'
+            else:
+                duration_str = f'{int(horas):02d}h {int(minutos):02d}m {int(segundos):02d}s'
+            video.close()
+
+            
+            
+            #Os arquivos que terminam com 2 serão pintadas de vermelho e escritas no excel, depois serão escritas os valores: nome do arquivo, duração do mp4, nome da pasta
+            if nome_pasta.endswith('2'):
+                
+                worksheet.write(f'A{linha_excel}', nome_arquivo, workbook.add_format({'font_color': 'red'}))
+                worksheet.write(f'B{linha_excel}', duration_str, workbook.add_format({'font_color': 'red'}))
+                worksheet.write(f'C{linha_excel}', nome_pasta, workbook.add_format({'font_color': 'red'}))
+            else:
+                
+                worksheet.write(f'A{linha_excel}', nome_arquivo)
+                worksheet.write(f'B{linha_excel}', duration_str)
+                worksheet.write(f'C{linha_excel}', nome_pasta)
+            
+            #Escrever na proxima linha
+            linha_excel += 1
+
+# Fechar o excel e salvar
 print('Feito')
 workbook.close()
