@@ -18,8 +18,8 @@ worksheet = workbook.add_worksheet()
 
 #Colocar o cabeçalho
 worksheet.write('A1', 'Nome do Arquivo')
-worksheet.write('B1', 'Nome da Pasta')
-worksheet.write('C1', 'Duração')
+worksheet.write('B1', 'Duração')
+worksheet.write('C1', 'Nome da Pasta')
 
 #Linha inicial, para não colocar no cabeçalho
 linha_excel = 2
